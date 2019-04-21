@@ -48,11 +48,13 @@ bool MRDMonitoring::Execute(){
   // }
 
   if( m_data->MRDdata.triggernum % period==0){
+    //    std::cout<<"sending trigger data"<<std::endl;
   zmq::message_t message(10);                  
   snprintf ((char *) message.data(), 10 , "%s" ,"MRDSingle") ;
   m_data->MonitoringSocket->send(message, ZMQ_SNDMORE);
 
   m_data->MRDout.Send(m_data->MonitoringSocket);
+  //std::cout<<"sent"<<std::endl;
   }
 
   return true;

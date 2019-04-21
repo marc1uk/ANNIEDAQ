@@ -5,6 +5,8 @@ CCTrigger::CCTrigger():Tool() {}
 
 bool CCTrigger::Initialise(std::string configfile, DataModel &data)
 {
+  threshold=0;
+  reftriggernum=99999;
 
 	if(configfile!="")	m_variables.Initialise(configfile);
 	//m_variables.Print();
@@ -94,7 +96,8 @@ bool CCTrigger::Initialise(std::string configfile, DataModel &data)
 		  //		  std::string cardname, std::string config, int cardslot, int crate
 		  std::cout<<"setting descriminator crate:"<<Ncrate.at(i)<<", Card:"<<Ncard.at(i)<<std::endl;
 		    LeCroy4413* tmp=new LeCroy4413(Ncard.at(i), Ccard.at(i), Ncrate.at(i));
-		  //		  tmp.
+		    disc.push_back(tmp);
+		    //		  tmp.
 	  
 		}
 		else std::cout << "\n\nUnkown card\n" << std::endl;
@@ -172,6 +175,18 @@ bool CCTrigger::Execute()
 	  snprintf ((char *) message.data(), tmp.str().length()+1 , "%s" ,tmp.str().c_str()) ;
 	  TriggerSend->send(message);
 	  //std::cout<<"MRD sending "<<tmp.str()<<std::endl;
+	}
+
+	if((m_data->MRDdata.triggernum % 10000) ==0  && m_data->MRDdata.triggernum != reftriggernum){
+	  threshold++;
+	  reftriggernum=m_data->MRDdata.triggernum;
+	  std::cout<<"triggernum="<<m_data->MRDdata.triggernum<<" , threshold set to "<<threshold<<std::endl;
+	  if (threshold>=1024) exit(1);
+	  for(int i=0;i<disc.size();i++){
+
+	    disc.at(i)->WriteThresholdValue(threshold);
+	  }
+
 	}
 
 	  return true;
